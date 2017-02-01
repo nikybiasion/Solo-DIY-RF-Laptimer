@@ -73,11 +73,11 @@ void SERIAL_ENABLE_HIGH() {
     delayMicroseconds(1);
 }
 
-void setChannelModule(uint8_t channel) {
+void setChannelModule(uint8_t channel, uint8_t band) {
     uint8_t i;
     uint16_t channelData;
 
-    channelData = pgm_read_word_near(channelTable + channel);
+    channelData = pgm_read_word_near(channelTable + channel + (8*band));
 
     // bit bang out 25 bits of data
     // Order: A0-3, !R/W, D0-D19

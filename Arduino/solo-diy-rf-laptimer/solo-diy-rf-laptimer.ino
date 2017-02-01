@@ -27,7 +27,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
     #define DEBUG_CODE(x) do { x } while(0)
@@ -67,6 +67,8 @@ const uint16_t musicNotes[] PROGMEM = { 523, 587, 659, 698, 784, 880, 988, 1046 
 #define CONTROL_DEC_THRESHOLD 7
 #define CONTROL_INC_THRESHOLD 8
 #define CONTROL_SET_THRESHOLD 9
+#define CONTROL_DEC_BAND 10
+#define CONTROL_INC_BAND 11
 #define CONTROL_DATA_REQUEST 255
 
 //----- RSSI --------------------------------------
@@ -92,6 +94,7 @@ uint32_t lapTimes[MAX_LAPS];
 //----- other globals------------------------------
 uint8_t allowEdgeGeneration = 1;
 uint8_t channelIndex = 0;
+uint8_t bandIndex = 0;
 uint8_t isRaceStarted = 0;
 uint8_t newLapIndex = 0;
 uint8_t sendData = 0;
@@ -116,7 +119,7 @@ void setup() {
 
     // set the channel as soon as we can
     // faster boot up times :)
-    setChannelModule(channelIndex);
+    setChannelModule(channelIndex, bandIndex);
     wait_rssi_ready();
     Serial.begin(BAUDRATE);
 
@@ -211,6 +214,11 @@ void loop() {
                     sendStage++;
                 }
                 break;
+            case 6:
+                if (send4BitsToSerial('B', bandIndex)) {
+                    sendStage++;
+                }
+                break;
             default:
                 sendData = 0;
                 DEBUG_CODE(
@@ -251,6 +259,14 @@ void loop() {
                 break;
             case CONTROL_INC_CHANNEL: // increase channel
                 incChannel();
+                playClickTones();
+                break;
+            case CONTROL_DEC_BAND: // decrease channel
+                decBand();
+                playClickTones();
+                break;
+            case CONTROL_INC_BAND: // increase channel
+                incBand();
                 playClickTones();
                 break;
             case CONTROL_DEC_THRESHOLD: // decrease threshold
@@ -308,7 +324,7 @@ void incChannel() {
     if (channelIndex < 7) {
         channelIndex++;
     }
-    setChannelModule(channelIndex);
+    setChannelModule(channelIndex, bandIndex);
     wait_rssi_ready();
 }
 // ----------------------------------------------------------------------------
@@ -316,7 +332,23 @@ void decChannel() {
     if (channelIndex > 0) {
         channelIndex--;
     }
-    setChannelModule(channelIndex);
+    setChannelModule(channelIndex, bandIndex);
+    wait_rssi_ready();
+}
+
+void incBand() {
+    if (bandIndex < 4) {
+        bandIndex++;
+    }
+    setChannelModule(channelIndex, bandIndex);
+    wait_rssi_ready();
+}
+// ----------------------------------------------------------------------------
+void decBand() {
+    if (bandIndex > 0) {
+        bandIndex--;
+    }
+    setChannelModule(channelIndex, bandIndex);
     wait_rssi_ready();
 }
 // ----------------------------------------------------------------------------
