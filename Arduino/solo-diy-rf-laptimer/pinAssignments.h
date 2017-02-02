@@ -31,8 +31,8 @@ SOFTWARE.
 
 #define led 13
 #define spiDataPin 10
-#define slaveSelectPin 12
-#define spiClockPin 11
+#define slaveSelectPin 11
+#define spiClockPin 12
 #define pinRaspiInt 5 //digital
 #define rssiPinA 3  //analog
 #define buzzerPin 9 // PWM buzzer
